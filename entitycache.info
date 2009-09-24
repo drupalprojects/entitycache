@@ -1,0 +1,8 @@
+; $Id$
+name = Entity cache
+description = Provides caching for core entities including nodes and taxonomy terms.
+
+core = 7.x
+
+files[] = entitycache.module
+files[] = entitycache.install

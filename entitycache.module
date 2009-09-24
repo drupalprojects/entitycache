@@ -1,0 +1,279 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Implements entity hooks and classes to allow for caching of core entities.
+ */
+
+/**
+ * Implement hook_entity_info_alter();
+ */
+function entitycache_entity_info_alter(&$entity_info) {
+  $entity_info['node']['controller class'] = 'EntityCacheNodeController';
+  $entity_info['node']['cacheable'] = FALSE;
+  $entity_info['user']['controller class'] = 'EntityCacheUserController';
+  $entity_info['user']['cacheable'] = FALSE;
+  $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
+  $entity_info['taxonomy_term']['cacheable'] = FALSE;
+  $entity_info['comment']['controller class'] = 'EntityCacheCommentController';
+  $entity_info['comment']['cacheable'] = FALSE;
+}
+
+ /**
+ * Controller class for nodes.
+ *
+ * This extends the EntityCacheBaseController class, adding required
+ * special handling for node objects. It is currently a direct
+ * copy of NodeController but will need refinements later.
+ */
+class EntityCacheNodeController extends EntityCacheBaseController {
+  protected function attachLoad(&$nodes) {
+    // Create an array of nodes for each content type and pass this to the
+    // object type specific callback.
+    $typed_nodes = array();
+    foreach ($nodes as $id => $object) {
+      $typed_nodes[$object->type][$id] = $object;
+    }
+
+    // Call object type specific callbacks on each typed array of nodes.
+    foreach ($typed_nodes as $node_type => $nodes_of_type) {
+      if (node_hook($node_type, 'load')) {
+        $function = node_type_get_base($node_type) . '_load';
+        $function($nodes_of_type);
+      }
+    }
+    $this->hookLoadArguments[] = array_keys($typed_nodes);
+    parent::attachLoad($nodes);
+  }
+}
+
+/**
+ * Controller class for users.
+ *
+ * This is currently a direct copy of UserController.
+ */
+class EntityCacheUserController extends EntityCacheBaseController {
+  function attachLoad(&$queried_users) {
+    // Build an array of user picture IDs so that these can be fetched later.
+    $picture_fids = array();
+    foreach ($queried_users as $key => $record) {
+      $picture_fids[] = $record->picture;
+      $queried_users[$key] = drupal_unpack($record);
+      $queried_users[$key]->roles = array();
+      if ($record->uid) {
+        $queried_users[$record->uid]->roles[DRUPAL_AUTHENTICATED_RID] = 'authenticated user';
+      }
+      else {
+        $queried_users[$record->uid]->roles[DRUPAL_ANONYMOUS_RID] = 'anonymous user';
+      }
+    }
+
+    // Add any additional roles from the database.
+    $result = db_query('SELECT r.rid, r.name, ur.uid FROM {role} r INNER JOIN {users_roles} ur ON ur.rid = r.rid WHERE ur.uid IN (:uids)', array(':uids' => array_keys($queried_users)));
+    foreach ($result as $record) {
+      $queried_users[$record->uid]->roles[$record->rid] = $record->name;
+    }
+
+    // Add the full file objects for user pictures if enabled.
+    if (!empty($picture_fids) && variable_get('user_pictures', 1) == 1) {
+      $pictures = file_load_multiple($picture_fids);
+      foreach ($queried_users as $account) {
+        if (!empty($account->picture) && isset($pictures[$account->picture])) {
+          $account->picture = $pictures[$account->picture];
+        }
+        else {
+          $account->picture = NULL;
+        }
+      }
+    }
+    // Call the default attachLoad() method. This will add fields and call
+    // hook_user_load().
+    parent::attachLoad($queried_users);
+  }
+}
+
+/**
+ * Controller class for taxonomy terms.
+ *
+ * This extends the DrupalDefaultEntityController class. Only alteration is
+ * that we match the condition on term name case-independently. This is
+ * currently an exact copy of TaxonomyTermController.
+ */
+class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
+  protected $type;
+  public function load($ids = array(), $conditions = array()) {
+    if (isset($conditions['type'])) {
+      $this->type = $conditions['type'];
+      unset($conditions['type']);
+    }
+    return parent::load($ids, $conditions);
+  }
+
+  protected function buildQuery() {
+    parent::buildQuery();
+    // When name is passed as a condition use LIKE.
+    if (isset($this->conditions['name'])) {
+      $conditions = &$this->query->conditions();
+      foreach ($conditions as $key => $condition) {
+        if ($condition['field'] == 'base.name') {
+          $conditions[$key]['operator'] = 'LIKE';
+        }
+      }
+    }
+    // Add the machine name field from the {taxonomy_vocabulary} table.
+    $this->query->innerJoin('taxonomy_vocabulary', 'v', 'base.vid = v.vid');
+    $this->query->addField('v', 'machine_name', 'vocabulary_machine_name');
+
+    if (!empty($this->type)) {
+      $this->query->innerJoin('taxonomy_vocabulary_node_type', 'n', 'base.vid = n.vid AND n.type = :type', array(':type' => $this->type));
+    }
+  }
+
+  protected function cacheGet($ids) {
+    $terms = parent::cacheGet($ids);
+    // Name matching is case insensitive, note that with some collations
+    // LOWER() and drupal_strtolower() may return different results.
+    foreach ($terms as $term) {
+      $term_values = (array) $term;
+      if (isset($this->conditions['name']) && drupal_strtolower($this->conditions['name'] != drupal_strtolower($term_values['name']))) {
+        unset($terms[$term->tid]);
+      }
+    }
+    return $terms;
+  }
+}
+
+/**
+ * Controller class for comments.
+ *
+ * Currently a direct copy of CommentController.
+ */
+class EntityCacheCommentController extends EntityCacheBaseController {
+  protected function buildQuery() {
+    parent::buildQuery();
+    // Specify additional fields from the user and node tables.
+    $this->query->innerJoin('node', 'n', 'base.nid = n.nid');
+    $this->query->addField('n', 'type', 'node_type');
+    $this->query->innerJoin('users', 'u', 'base.uid = u.uid');
+    $this->query->addField('u', 'name', 'registered_name');
+    $this->query->fields('u', array( 'uid', 'signature', 'picture', 'data', 'status'));
+  }
+
+  protected function attachLoad(&$comments) {
+    // Setup standard comment properties.
+    foreach ($comments as $key => $comment) {
+      $comment = drupal_unpack($comment);
+      $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
+      $comment->new = node_mark($comment->nid, $comment->timestamp);
+      $comment->node_type = 'comment_node_' . $comment->node_type;
+      $comments[$key] = $comment;
+    }
+  }
+}
+
+/**
+ *  Set up a base controller to allow for cache_get_multiple() and cache_set().
+ */
+class EntityCacheBaseController extends DrupalDefaultEntityController {
+
+  public function load($ids = array(), $conditions = array()) {
+    $this->ids = $ids;
+    $this->conditions = $conditions;
+
+    $entities = array();
+
+    // Revisions are not statically cached, and require a different query to
+    // other conditions, so separate the revision id into its own variable.
+    if ($this->revisionKey && isset($this->conditions[$this->revisionKey])) {
+      $this->revisionId = $this->conditions[$this->revisionKey];
+      unset($this->conditions[$this->revisionKey]);
+    }
+    else {
+      $this->revisionId = FALSE;
+    }
+
+    // Create a new variable which is either a prepared version of the $ids
+    // array for later comparison with the entity cache, or FALSE if no $ids
+    // were passed. The $ids array is reduced as items are loaded from cache,
+    // and we need to know if it's empty for this reason to avoid querying the
+    // database when all requested entities are loaded from cache.
+    $passed_ids = !empty($this->ids) ? array_flip($this->ids) : FALSE;
+    // Try to load entities from the static cache, if the entity type supports
+    // static caching.
+    if ($this->cache) {
+      $entities = $this->cacheGet($this->ids, $this->conditions);
+      // If any entities were loaded, remove them from the ids still to load.
+      if ($passed_ids) {
+        $this->ids = array_keys(array_diff_key($passed_ids, $entities));
+      }
+
+      // Attempt to load any remaining entities from the persistent cache.
+      if ($this->ids && !$this->conditions) {
+        $cached = cache_get_multiple($this->ids, 'cache_entity_' . $this->entityType);
+        $cached_entities = array();
+        foreach ($cached as $item) {
+          $cached_entities[$item->cid] = $item->data;
+        }
+        if ($cached) {
+          $this->ids = array_diff($this->ids, array_keys($cached_entities));
+        }
+      }
+    }
+
+    // Load any remaining entities from the database. This is the case if $ids
+    // is set to FALSE (so we load all entities), if there are any ids left to
+    // load, if loading a revision, or if $conditions was passed without $ids.
+    if ($this->ids === FALSE || $this->ids || $this->revisionId || ($this->conditions && !$passed_ids)) {
+      // Build the query.
+      $this->buildQuery();
+      $queried_entities = $this->query
+        ->execute()
+        ->fetchAllAssoc($this->idKey);
+    }
+
+    // Pass all entities loaded from the database through $this->attachLoad(),
+    // which attaches fields (if supported by the entity type) and calls the
+    // entity type specific load callback, for example hook_node_load().
+    if (!empty($queried_entities)) {
+      $this->attachLoad($queried_entities);
+      $entities += $queried_entities;
+    }
+
+    if ($this->cache) {
+      // Add entities to the cache if we are not loading a revision.
+      if (!empty($queried_entities) && !$this->revisionId) {
+        foreach ($queried_entities as $item) {
+          cache_set($item->{$this->idKey}, $item, 'cache_entity_' . $this->entityType);
+        }
+        $this->cacheSet($queried_entities);
+      }
+      if (isset($cached_entities)) {
+        $this->cacheSet($cached_entities);
+        $entities += $cached_entities;
+      }
+      // Ensure that the returned array is ordered the same as the original
+      // $ids array if this was passed in and remove any invalid ids.
+      if ($passed_ids) {
+        // Remove any invalid ids from the array.
+        $passed_ids = array_intersect_key($passed_ids, $entities);
+        foreach ($entities as $entity) {
+          $passed_ids[$entity->{$this->idKey}] = $entity;
+        }
+        $entities = $passed_ids;
+      }
+    }
+
+    return $entities;
+  }
+}
+
+/**
+ * Helper function to list all supported core entities.
+ *
+ * @return
+ *   An array of core entities.
+ */
+function entity_cache_supported_entities() {
+  return array('node', 'comment', 'user', 'taxonomy_term');
+}

@@ -1,0 +1,17 @@
+<?php
+// $Id$
+
+/**
+ * @file Schema and install hooks for the entitycache module.
+ */
+function entitycache_schema() {
+  $schema = array();
+  $entities = entity_cache_supported_entities();
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+
+  foreach ($entities as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+  return $schema;
+}
