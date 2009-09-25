@@ -3,29 +3,29 @@
 
 /**
  * @file
- *   Implements entity hooks and classes to allow for caching of core entities.
+ * Implements entity hooks and classes to allow for caching of core entities.
  */
 
 /**
  * Implement hook_entity_info_alter();
  */
 function entitycache_entity_info_alter(&$entity_info) {
+  // @todo caching users will only be effective if we don't use the cache
+  // when $account->uid = $GLOBALS['user']->uid - otherwise it'll need to be
+  // cleared in too many places to be worth maintaining at all.
   $entity_info['node']['controller class'] = 'EntityCacheNodeController';
   $entity_info['node']['cacheable'] = FALSE;
-  $entity_info['user']['controller class'] = 'EntityCacheUserController';
-  $entity_info['user']['cacheable'] = FALSE;
   $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
   $entity_info['taxonomy_term']['cacheable'] = FALSE;
   $entity_info['comment']['controller class'] = 'EntityCacheCommentController';
   $entity_info['comment']['cacheable'] = FALSE;
 }
 
- /**
+/**
  * Controller class for nodes.
  *
  * This extends the EntityCacheBaseController class, adding required
- * special handling for node objects. It is currently a direct
- * copy of NodeController but will need refinements later.
+ * special handling for node objects.
  */
 class EntityCacheNodeController extends EntityCacheBaseController {
   protected function attachLoad(&$nodes) {
@@ -46,12 +46,24 @@ class EntityCacheNodeController extends EntityCacheBaseController {
     $this->hookLoadArguments[] = array_keys($typed_nodes);
     parent::attachLoad($nodes);
   }
+
+  protected function attachAfterLoad(&$nodes) {
+    // Create an array of nodes for each content type and pass this to
+    // hook_entitycache_node_load().
+    $typed_nodes = array();
+    foreach ($nodes as $id => $object) {
+      $typed_nodes[$object->type][$id] = $object;
+    }
+
+    $this->hookLoadArguments[] = array_keys($typed_nodes);
+    parent::attachAfterLoad($nodes);
+  }
 }
 
 /**
  * Controller class for users.
  *
- * This is currently a direct copy of UserController.
+ * Currently a direct copy of UserController.
  */
 class EntityCacheUserController extends EntityCacheBaseController {
   function attachLoad(&$queried_users) {
@@ -96,9 +108,7 @@ class EntityCacheUserController extends EntityCacheBaseController {
 /**
  * Controller class for taxonomy terms.
  *
- * This extends the DrupalDefaultEntityController class. Only alteration is
- * that we match the condition on term name case-independently. This is
- * currently an exact copy of TaxonomyTermController.
+ * Currently an exact copy of TaxonomyTermController.
  */
 class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
   protected $type;
@@ -182,6 +192,8 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     $this->conditions = $conditions;
 
     $entities = array();
+    $cached_entities = array();
+    $queried_entities = array();
 
     // Revisions are not statically cached, and require a different query to
     // other conditions, so separate the revision id into its own variable.
@@ -211,7 +223,6 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       // Attempt to load any remaining entities from the persistent cache.
       if ($this->ids && !$this->conditions) {
         $cached = cache_get_multiple($this->ids, 'cache_entity_' . $this->entityType);
-        $cached_entities = array();
         foreach ($cached as $item) {
           $cached_entities[$item->cid] = $item->data;
         }
@@ -240,31 +251,49 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       $entities += $queried_entities;
     }
 
-    if ($this->cache) {
+    if ($this->cache && !empty($queried_entities)) {
       // Add entities to the cache if we are not loading a revision.
-      if (!empty($queried_entities) && !$this->revisionId) {
+      if (!$this->revisionId) {
         foreach ($queried_entities as $item) {
           cache_set($item->{$this->idKey}, $item, 'cache_entity_' . $this->entityType);
         }
-        $this->cacheSet($queried_entities);
-      }
-      if (isset($cached_entities)) {
-        $this->cacheSet($cached_entities);
-        $entities += $cached_entities;
-      }
-      // Ensure that the returned array is ordered the same as the original
-      // $ids array if this was passed in and remove any invalid ids.
-      if ($passed_ids) {
-        // Remove any invalid ids from the array.
-        $passed_ids = array_intersect_key($passed_ids, $entities);
-        foreach ($entities as $entity) {
-          $passed_ids[$entity->{$this->idKey}] = $entity;
-        }
-        $entities = $passed_ids;
       }
     }
+    $new_entities = $queried_entities + $cached_entities;
 
+    if (!empty($new_entities)) {
+      $this->attachAfterLoad($new_entities);
+      if (!$this->revisionId) {
+        $this->cacheSet($new_entities);
+      }
+      $entities += $cached_entities;
+    }
+    // Ensure that the returned array is ordered the same as the original
+    // $ids array if this was passed in and remove any invalid ids.
+    if ($passed_ids) {
+      // Remove any invalid ids from the array.
+      $passed_ids = array_intersect_key($passed_ids, $entities);
+      foreach ($entities as $entity) {
+        $passed_ids[$entity->{$this->idKey}] = $entity;
+      }
+      $entities = $passed_ids;
+    }
     return $entities;
+  }
+
+  /**
+   * Allow modules to implement uncached entity hooks.
+   *
+   * Adds an additional hook_entitycache_$type_load() for modules which need
+   * to add data to objects during the request which can't be cached.
+   * @see entitycache_entitycache_node_load().
+   */
+  protected function attachAfterLoad($new_entities) {
+    foreach (module_implements('entitycache_' . $this->entityType . '_load', $new_entities) as $module) {
+      $function = $module . '_entitycache_' . $this->entityType . '_load';
+      $args = array_merge(array($new_entities), $this->hookLoadArguments);
+      call_user_func_array($function, $args);
+    }
   }
 }
 
@@ -274,6 +303,117 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
  * @return
  *   An array of core entities.
  */
-function entity_cache_supported_entities() {
+function entitycache_supported_entities() {
   return array('node', 'comment', 'user', 'taxonomy_term');
+}
+
+/**
+ * Implement hook_entitycache_node_load().
+ */
+function entitycache_entitycache_node_load($nodes, $types) {
+  // Both book and poll modules need to add data for the duration of the request
+  // only. We can't suppress their hooks being called then cached, so simply
+  // call them again ourselves which will overwrite the cached values with the
+  // correct ones.
+  // module_invoke() breaks simpletests for some reason, so do a
+  // module_exists() and a direct function all instead.
+  if (module_exists('book')) {
+    book_node_load($nodes, $types);
+  }
+  if (module_exists('poll')) {
+    poll_load($nodes);
+  }
+}
+
+/**
+ * Helper function for clearing the node cache.
+ */
+function entitycache_node_helper($node) {
+  cache_clear_all($node->nid, 'cache_entity_node');
+}
+
+/**
+ * Implement hook_node_delete().
+ */
+function entitycache_node_delete($node) {
+  entitycache_node_helper($node);
+}
+
+/**
+ * Implement hook_node_update().
+ */
+function entitycache_node_update($node) {
+  entitycache_node_helper($node);
+}
+
+/**
+ * Implement hook_user_delete().
+ */
+function entitycache_user_delete($account) {
+  cache_clear_all($account->uid, 'cache_entity_user');
+}
+
+/**
+ * Implement hook_user_update().
+ */
+function entitycache_user_update(&$edit, $account) {
+  cache_clear_all($account->uid, 'cache_entity_user');
+}
+
+/**
+ * Implement hook_taxonomy_term_delete().
+ */
+function entitycache_taxonomy_term_delete($term) {
+  cache_clear_all($term->tid, 'cache_entity_taxonomy_term');
+}
+
+/**
+ * Implement of hook_taxonomy_term_update().
+ */
+function entitycache_taxonomy_term_update($term) {
+  cache_clear_all($term->tid, 'cache_entity_taxonomy_term');
+}
+
+/**
+ * Helper function to for comment hooks.
+ */
+function entitycache_comment_helper($comment) {
+  cache_clear_all($comment->cid, 'cache_entity_comment');
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+
+/**
+ * Implement hook_comment_delete().
+ */
+function entitycache_comment_delete($comment) {
+  entitycache_comment_helper($comment);
+}
+
+/**
+ * Implement hook_comment_insert().
+ */
+function hook_comment_insert($comment) {
+  entitycache_comment_helper($comment);
+}
+
+/**
+ * Implement hook_comment_update().
+ */
+function entitycache_comment_update($comment) {
+  entitycache_comment_helper($comment);
+}
+
+/**
+ * Implement hook_comment_publish().
+ */
+function entitycache_comment_publish($comment) {
+  entitycache_comment_helper($comment);
+}
+
+/**
+ * Implement hook_comment_unpublish().
+ */
+function entitycache_comment_unpublish($comment) {
+  entitycache_comment_helper($comment);
 }
