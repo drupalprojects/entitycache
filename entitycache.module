@@ -10,9 +10,6 @@
  * Implement hook_entity_info_alter();
  */
 function entitycache_entity_info_alter(&$entity_info) {
-  // @todo caching users will only be effective if we don't use the cache
-  // when $account->uid = $GLOBALS['user']->uid - otherwise it'll need to be
-  // cleared in too many places to be worth maintaining at all.
   $entity_info['node']['controller class'] = 'EntityCacheNodeController';
   $entity_info['node']['cacheable'] = FALSE;
   $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
@@ -28,80 +25,8 @@ function entitycache_entity_info_alter(&$entity_info) {
  * special handling for node objects.
  */
 class EntityCacheNodeController extends EntityCacheBaseController {
-  protected function attachLoad(&$nodes) {
-    // Create an array of nodes for each content type and pass this to the
-    // object type specific callback.
-    $typed_nodes = array();
-    foreach ($nodes as $id => $object) {
-      $typed_nodes[$object->type][$id] = $object;
-    }
-
-    // Call object type specific callbacks on each typed array of nodes.
-    foreach ($typed_nodes as $node_type => $nodes_of_type) {
-      if (node_hook($node_type, 'load')) {
-        $function = node_type_get_base($node_type) . '_load';
-        $function($nodes_of_type);
-      }
-    }
-    $this->hookLoadArguments[] = array_keys($typed_nodes);
-    parent::attachLoad($nodes);
-  }
-
-  protected function attachAfterLoad(&$nodes) {
-    // Create an array of nodes for each content type and pass this to
-    // hook_entitycache_node_load().
-    $typed_nodes = array();
-    foreach ($nodes as $id => $object) {
-      $typed_nodes[$object->type][$id] = $object;
-    }
-
-    $this->hookLoadArguments[] = array_keys($typed_nodes);
-    parent::attachAfterLoad($nodes);
-  }
-}
-
-/**
- * Controller class for users.
- *
- * Currently a direct copy of UserController.
- */
-class EntityCacheUserController extends EntityCacheBaseController {
-  function attachLoad(&$queried_users) {
-    // Build an array of user picture IDs so that these can be fetched later.
-    $picture_fids = array();
-    foreach ($queried_users as $key => $record) {
-      $picture_fids[] = $record->picture;
-      $queried_users[$key] = drupal_unpack($record);
-      $queried_users[$key]->roles = array();
-      if ($record->uid) {
-        $queried_users[$record->uid]->roles[DRUPAL_AUTHENTICATED_RID] = 'authenticated user';
-      }
-      else {
-        $queried_users[$record->uid]->roles[DRUPAL_ANONYMOUS_RID] = 'anonymous user';
-      }
-    }
-
-    // Add any additional roles from the database.
-    $result = db_query('SELECT r.rid, r.name, ur.uid FROM {role} r INNER JOIN {users_roles} ur ON ur.rid = r.rid WHERE ur.uid IN (:uids)', array(':uids' => array_keys($queried_users)));
-    foreach ($result as $record) {
-      $queried_users[$record->uid]->roles[$record->rid] = $record->name;
-    }
-
-    // Add the full file objects for user pictures if enabled.
-    if (!empty($picture_fids) && variable_get('user_pictures', 1) == 1) {
-      $pictures = file_load_multiple($picture_fids);
-      foreach ($queried_users as $account) {
-        if (!empty($account->picture) && isset($pictures[$account->picture])) {
-          $account->picture = $pictures[$account->picture];
-        }
-        else {
-          $account->picture = NULL;
-        }
-      }
-    }
-    // Call the default attachLoad() method. This will add fields and call
-    // hook_user_load().
-    parent::attachLoad($queried_users);
+  function attachLoad(&$nodes) {
+    NodeController::attachLoad($nodes);
   }
 }
 
@@ -113,44 +38,15 @@ class EntityCacheUserController extends EntityCacheBaseController {
 class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
   protected $type;
   public function load($ids = array(), $conditions = array()) {
-    if (isset($conditions['type'])) {
-      $this->type = $conditions['type'];
-      unset($conditions['type']);
-    }
-    return parent::load($ids, $conditions);
+    return TaxonomyTermController::load($ids, $conditions);
   }
 
   protected function buildQuery() {
-    parent::buildQuery();
-    // When name is passed as a condition use LIKE.
-    if (isset($this->conditions['name'])) {
-      $conditions = &$this->query->conditions();
-      foreach ($conditions as $key => $condition) {
-        if ($condition['field'] == 'base.name') {
-          $conditions[$key]['operator'] = 'LIKE';
-        }
-      }
-    }
-    // Add the machine name field from the {taxonomy_vocabulary} table.
-    $this->query->innerJoin('taxonomy_vocabulary', 'v', 'base.vid = v.vid');
-    $this->query->addField('v', 'machine_name', 'vocabulary_machine_name');
-
-    if (!empty($this->type)) {
-      $this->query->innerJoin('taxonomy_vocabulary_node_type', 'n', 'base.vid = n.vid AND n.type = :type', array(':type' => $this->type));
-    }
+    TaxonomyTermController::buildQuery();
   }
 
   protected function cacheGet($ids) {
-    $terms = parent::cacheGet($ids);
-    // Name matching is case insensitive, note that with some collations
-    // LOWER() and drupal_strtolower() may return different results.
-    foreach ($terms as $term) {
-      $term_values = (array) $term;
-      if (isset($this->conditions['name']) && drupal_strtolower($this->conditions['name'] != drupal_strtolower($term_values['name']))) {
-        unset($terms[$term->tid]);
-      }
-    }
-    return $terms;
+    return TaxonomyTermController::cacheGet($ids);
   }
 }
 
@@ -161,24 +57,11 @@ class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
  */
 class EntityCacheCommentController extends EntityCacheBaseController {
   protected function buildQuery() {
-    parent::buildQuery();
-    // Specify additional fields from the user and node tables.
-    $this->query->innerJoin('node', 'n', 'base.nid = n.nid');
-    $this->query->addField('n', 'type', 'node_type');
-    $this->query->innerJoin('users', 'u', 'base.uid = u.uid');
-    $this->query->addField('u', 'name', 'registered_name');
-    $this->query->fields('u', array( 'uid', 'signature', 'picture', 'data', 'status'));
+    CommentController::buildQuery();
   }
 
   protected function attachLoad(&$comments) {
-    // Setup standard comment properties.
-    foreach ($comments as $key => $comment) {
-      $comment = drupal_unpack($comment);
-      $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-      $comment->new = node_mark($comment->nid, $comment->timestamp);
-      $comment->node_type = 'comment_node_' . $comment->node_type;
-      $comments[$key] = $comment;
-    }
+    CommentController::attachLoad($comments);
   }
 }
 
@@ -291,8 +174,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
   protected function attachAfterLoad($new_entities) {
     foreach (module_implements('entitycache_' . $this->entityType . '_load', $new_entities) as $module) {
       $function = $module . '_entitycache_' . $this->entityType . '_load';
-      $args = array_merge(array($new_entities), $this->hookLoadArguments);
-      call_user_func_array($function, $args);
+      call_user_func_array($function, $new_entities);
     }
   }
 }
@@ -304,13 +186,13 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
  *   An array of core entities.
  */
 function entitycache_supported_entities() {
-  return array('node', 'comment', 'user', 'taxonomy_term');
+  return array('node', 'comment', 'taxonomy_term');
 }
 
 /**
  * Implement hook_entitycache_node_load().
  */
-function entitycache_entitycache_node_load($nodes, $types) {
+function entitycache_entitycache_node_load($nodes) {
   // Both book and poll modules need to add data for the duration of the request
   // only. We can't suppress their hooks being called then cached, so simply
   // call them again ourselves which will overwrite the cached values with the
@@ -318,7 +200,7 @@ function entitycache_entitycache_node_load($nodes, $types) {
   // module_invoke() breaks simpletests for some reason, so do a
   // module_exists() and a direct function all instead.
   if (module_exists('book')) {
-    book_node_load($nodes, $types);
+    book_node_load($nodes, array());
   }
   if (module_exists('poll')) {
     poll_load($nodes);
