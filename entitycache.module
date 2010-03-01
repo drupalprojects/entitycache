@@ -143,7 +143,6 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     if ($this->cache && !empty($queried_entities)) {
       // Add entities to the cache if we are not loading a revision.
       if (!$this->revisionId) {
-        dd(debug_backtrace());
         foreach ($queried_entities as $item) {
           cache_set($item->{$this->idKey}, $item, 'cache_entity_' . $this->entityType);
         }
