@@ -172,9 +172,9 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
    * @see entitycache_entitycache_node_load().
    */
   protected function attachAfterLoad($new_entities) {
-    foreach (module_implements('entitycache_' . $this->entityType . '_load', $new_entities) as $module) {
+    foreach (module_implements('entitycache_' . $this->entityType . '_load') as $module) {
       $function = $module . '_entitycache_' . $this->entityType . '_load';
-      call_user_func_array($function, $new_entities);
+      $function($new_entities);
     }
   }
 }
@@ -191,20 +191,22 @@ function entitycache_supported_entities() {
 
 /**
  * Implement hook_entitycache_node_load().
+ *
+ * This forces book information to be added on each request, to avoid expensive
+ * cache clears.
  */
-function entitycache_entitycache_node_load($nodes) {
-  // Both book and poll modules need to add data for the duration of the request
-  // only. We can't suppress their hooks being called then cached, so simply
-  // call them again ourselves which will overwrite the cached values with the
-  // correct ones.
-  // module_invoke() breaks simpletests for some reason, so do a
-  // module_exists() and a direct function all instead.
-  if (module_exists('book')) {
-    book_node_load($nodes, array());
-  }
-  if (module_exists('poll')) {
-    poll_load($nodes);
-  }
+function book_entitycache_node_load($nodes) {
+  book_node_load($nodes, array());
+}
+
+/**
+ * Implement hook_entitycache_node_load().
+ *
+ * This forces poll information to be loaded on each request, since it loads
+ * user-specific information during the request.
+ */
+function poll_entitycache_node_load($nodes) {
+  poll_load($nodes);
 }
 
 /**
@@ -226,20 +228,6 @@ function entitycache_node_delete($node) {
  */
 function entitycache_node_update($node) {
   entitycache_node_helper($node);
-}
-
-/**
- * Implement hook_user_delete().
- */
-function entitycache_user_delete($account) {
-  cache_clear_all($account->uid, 'cache_entity_user');
-}
-
-/**
- * Implement hook_user_update().
- */
-function entitycache_user_update(&$edit, $account) {
-  cache_clear_all($account->uid, 'cache_entity_user');
 }
 
 /**
