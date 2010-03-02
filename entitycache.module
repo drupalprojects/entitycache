@@ -11,14 +11,14 @@
  */
 function entitycache_entity_info_alter(&$entity_info) {
   $entity_info['node']['controller class'] = 'EntityCacheNodeController';
-  $entity_info['node']['cacheable'] = FALSE;
-  $entity_info['node']['entity cache'] = TRUE;
   $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
-  $entity_info['taxonomy_term']['cacheable'] = FALSE;
-  $entity_info['taxonomy_term']['entity cache'] = TRUE;
   $entity_info['comment']['controller class'] = 'EntityCacheCommentController';
-  $entity_info['comment']['cacheable'] = FALSE;
-  $entity_info['comment']['entity cache'] = TRUE;
+  $entity_info['file']['controller class'] = 'EntityCacheBaseController';
+
+  foreach (entitycache_supported_core_entities() as $type) {
+    $entity_info[$type]['cacheable'] = FALSE;
+    $entity_info[$type]['entity cache'] = TRUE;
+  }
 }
 
 /**
@@ -191,8 +191,8 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
  * @return
  *   An array of core entities.
  */
-function entitycache_supported_entities() {
-  return array('node', 'comment', 'taxonomy_term');
+function entitycache_supported_core_entities() {
+  return array('comment', 'file', 'node', 'taxonomy_term', 'taxonomy_vocabulary');
 }
 
 /**
@@ -304,4 +304,18 @@ function entitycache_comment_publish($comment) {
  */
 function entitycache_comment_unpublish($comment) {
   cache_clear_all($comment->cid, 'cache_entity_comment');
+}
+
+/**
+ * Implement hook_file_delete().
+ */
+function entitycache_file_delete($file) {
+  cache_clear_all('cache_entity_file', $file->fid);
+}
+
+/**
+ * Implement hook_taxonomy_vocabulary_delete().
+ */
+function entitycache_taxonomy_vocabulary_delete($vocabulary) {
+  cache_clear_all($vocabulary->vid, 'cache_entity_taxonomy_vocabulary');
 }

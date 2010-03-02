@@ -6,7 +6,7 @@
  */
 function entitycache_schema() {
   $schema = array();
-  $entities = entitycache_supported_entities();
+  $entities = entitycache_supported_core_entities();
   $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
 
   foreach ($entities as $type) {
