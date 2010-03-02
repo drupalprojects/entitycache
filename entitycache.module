@@ -127,7 +127,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     // this is most likely to be handled by mongodb field storage.
 
     // Attempt to load any remaining entities from the persistent cache.
-    if (!$this->revisionID && $this->conditions) {
+    if (!$this->revisionId && $this->conditions) {
       if (module_implements('entitycache_resolve_conditions')) {
         $this->ids = module_invoke_all('entitycache_resolve_conditions', $this->ids, $this->conditions, $this->entityType);
         $this->conditions = array();
