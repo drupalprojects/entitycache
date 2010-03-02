@@ -122,16 +122,25 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       if ($passed_ids) {
         $this->ids = array_keys(array_diff_key($passed_ids, $entities));
       }
+    }
+    // Allow modules to populate $this->ids by resolving conditions themselves
+    // this is most likely to be handled by mongodb field storage.
 
-      // Attempt to load any remaining entities from the persistent cache.
-      if ($this->ids && !$this->conditions) {
-        $cached = cache_get_multiple($this->ids, 'cache_entity_' . $this->entityType);
-        foreach ($cached as $item) {
-          $cached_entities[$item->cid] = $item->data;
-        }
-        if ($cached) {
-          $this->ids = array_diff($this->ids, array_keys($cached_entities));
-        }
+    // Attempt to load any remaining entities from the persistent cache.
+    if (!$this->revisionID && $this->conditions) {
+      if (module_implements('entitycache_resolve_conditions')) {
+        $this->ids = module_invoke_all('entitycache_resolve_conditions', $this->ids, $this->conditions, $this->entityType);
+        $this->conditions = array();
+      }
+    }
+
+    if ($this->ids && !$this->conditions) {
+      $cached = cache_get_multiple($this->ids, 'cache_entity_' . $this->entityType);
+      foreach ($cached as $item) {
+        $cached_entities[$item->cid] = $item->data;
+      }
+      if ($cached) {
+        $this->ids = array_diff($this->ids, array_keys($cached_entities));
       }
     }
 
