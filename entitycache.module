@@ -214,6 +214,23 @@ function entitycache_entity_insert($entity, $type) {
 }
 
 /**
+ * Implements hook_entity_delete().
+ *
+ * This hook is not invoked by core modules, see specific _delete() hook
+ * implementations below. However contrib modules may invoke the hook using
+ * entity_invoke('delete', 'myentity', $entity); rather than doing a manual
+ * cache_clear_all() themselves.
+ * @see http://drupal.org/709892
+ */
+function entitycache_entity_delete($entity, $type) {
+  $info = entity_get_info($type);
+  list($id) = entity_extract_ids($type, $entity);
+  if (!empty($info['entity cache'])) {
+    cache_clear_all($id, 'cache_entity_' . $type);
+  }
+}
+
+/**
  * Implements hook_entity_update().
  */
 function entitycache_entity_update($entity, $type) {
