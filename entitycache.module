@@ -10,15 +10,10 @@
  * Implements hook_entity_info_alter().
  */
 function entitycache_entity_info_alter(&$entity_info) {
-  $entity_info['node']['controller class'] = 'EntityCacheNodeController';
-  $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
-  $entity_info['taxonomy_vocabulary']['controller class'] = 'EntityCacheTaxonomyVocabularyController';
-  $entity_info['comment']['controller class'] = 'EntityCacheCommentController';
-  $entity_info['file']['controller class'] = 'EntityCacheBaseController';
-
-  foreach (entitycache_supported_core_entities() as $type) {
+  foreach (entitycache_supported_core_entities(TRUE) as $type => $controller) {
     $entity_info[$type]['cacheable'] = FALSE;
     $entity_info[$type]['entity cache'] = TRUE;
+    $entity_info[$type]['controller class'] = $controller;
   }
 }
 
@@ -78,6 +73,15 @@ class EntityCacheCommentController extends EntityCacheBaseController {
 
   protected function attachLoad(&$comments) {
     CommentController::attachLoad($comments);
+  }
+}
+
+/**
+ * Controller class for users.
+ */
+class EntityCacheUserController extends EntityCacheBaseController {
+  protected function attachLoad(&$users) {
+    UserController::attachLoad($users);
   }
 }
 
@@ -198,11 +202,33 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
 /**
  * Helper function to list all supported core entities.
  *
+ * @param $enabled
+ *   If set, only return enabled modules.
+ *
  * @return
  *   An array of core entities.
  */
-function entitycache_supported_core_entities() {
-  return array('comment', 'file', 'node', 'taxonomy_term', 'taxonomy_vocabulary');
+function entitycache_supported_core_entities($enabled = FALSE) {
+  $return = array(
+    'comment' => 'EntityCacheCommentController',
+    'file' => 'EntityCacheBaseController',
+    'node' => 'EntityCacheNodeController',
+    'taxonomy_term' => 'EntityCacheTaxonomyTermController',
+    'taxonomy_vocabulary' => 'EntityCacheTaxonomyVocabularyController',
+    'user' => 'EntityCacheUserController',
+  );
+  // If the $enabled param is past, remove modules from the array if they're
+  // not enabled.
+  if ($enabled) {
+    if (!module_exists('comment')) {
+      unset($return['comment']);
+    }
+    if (!module_exists('taxonomy')) {
+      unset($return['taxonomy_term']));
+      unset($return['taxonomy_vocabulary']);
+    }
+  }
+  return $return;
 }
 
 /**
@@ -345,4 +371,14 @@ function entitycache_file_delete($file) {
  */
 function entitycache_taxonomy_vocabulary_delete($vocabulary) {
   cache_clear_all($vocabulary->vid, 'cache_entity_taxonomy_vocabulary');
+}
+
+/**
+ * Implements hook_user_cancel().
+ *
+ * @todo: hook_user_delete() soon hopefully.
+ * @see http://drupal.org/node/705306.
+ */
+function entitycache_user_cancel($edit, $account, $method) {
+  cache_clear_all($account->uid, 'cache_entity_user');
 }
