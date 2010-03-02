@@ -224,7 +224,7 @@ function entitycache_supported_core_entities($enabled = FALSE) {
       unset($return['comment']);
     }
     if (!module_exists('taxonomy')) {
-      unset($return['taxonomy_term']));
+      unset($return['taxonomy_term']);
       unset($return['taxonomy_vocabulary']);
     }
   }
