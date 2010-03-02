@@ -7,7 +7,7 @@
  */
 
 /**
- * Implement hook_entity_info_alter();
+ * Implements hook_entity_info_alter();
  */
 function entitycache_entity_info_alter(&$entity_info) {
   $entity_info['node']['controller class'] = 'EntityCacheNodeController';
@@ -196,7 +196,7 @@ function entitycache_supported_core_entities() {
 }
 
 /**
- * Implement hook_entity_insert().
+ * Implements hook_entity_insert().
  */
 function entitycache_entity_insert($entity, $type) {
   // It is possible for other _insert() hooks to load an entity before it has
@@ -214,7 +214,7 @@ function entitycache_entity_insert($entity, $type) {
 }
 
 /**
- * Implement hook_entity_update().
+ * Implements hook_entity_update().
  */
 function entitycache_entity_update($entity, $type) {
   // It is possible for other _update() hooks to load an entity before it has
@@ -232,7 +232,7 @@ function entitycache_entity_update($entity, $type) {
 }
 
 /**
- * Implement hook_entitycache_node_load().
+ * Implements hook_entitycache_node_load().
  *
  * This forces book information to be added on each request, to avoid expensive
  * cache clears.
@@ -242,7 +242,7 @@ function book_entitycache_node_load($nodes) {
 }
 
 /**
- * Implement hook_entitycache_node_load().
+ * Implements hook_entitycache_node_load().
  *
  * This forces poll information to be loaded on each request, since it loads
  * user-specific information during the request.
@@ -252,14 +252,14 @@ function poll_entitycache_node_load($nodes) {
 }
 
 /**
- * Implement hook_node_delete().
+ * Implements hook_node_delete().
  */
 function entitycache_node_delete($node) {
   cache_clear_all($node->nid, 'cache_entity_node');
 }
 
 /**
- * Implement hook_taxonomy_term_delete().
+ * Implements hook_taxonomy_term_delete().
  */
 function entitycache_taxonomy_term_delete($term) {
   cache_clear_all($term->tid, 'cache_entity_taxonomy_term');
@@ -267,7 +267,7 @@ function entitycache_taxonomy_term_delete($term) {
 
 
 /**
- * Implement hook_comment_delete().
+ * Implements hook_comment_delete().
  */
 function entitycache_comment_delete($comment) {
   cache_clear_all($comment->cid, 'cache_entity_comment');
@@ -275,21 +275,21 @@ function entitycache_comment_delete($comment) {
 }
 
 /**
- * Implement hook_comment_insert().
+ * Implements hook_comment_insert().
  */
 function hook_comment_insert($comment) {
   cache_clear_all($comment->nid, 'cache_entity_node');
 }
 
 /**
- * Implement hook_comment_update().
+ * Implements hook_comment_update().
  */
 function entitycache_comment_update($comment) {
   cache_clear_all($comment->nid, 'cache_entity_node');
 }
 
 /**
- * Implement hook_comment_publish().
+ * Implements hook_comment_publish().
  *
  * @todo: core should not call this hook outside of a comment_save().
  */
@@ -298,7 +298,7 @@ function entitycache_comment_publish($comment) {
 }
 
 /**
- * Implement hook_comment_unpublish().
+ * Implements hook_comment_unpublish().
  *
  * @todo: core should not call this hook outside of a comment_save().
  */
@@ -307,14 +307,14 @@ function entitycache_comment_unpublish($comment) {
 }
 
 /**
- * Implement hook_file_delete().
+ * Implements hook_file_delete().
  */
 function entitycache_file_delete($file) {
   cache_clear_all($file->fid, 'cache_entity_file');
 }
 
 /**
- * Implement hook_taxonomy_vocabulary_delete().
+ * Implements hook_taxonomy_vocabulary_delete().
  */
 function entitycache_taxonomy_vocabulary_delete($vocabulary) {
   cache_clear_all($vocabulary->vid, 'cache_entity_taxonomy_vocabulary');
