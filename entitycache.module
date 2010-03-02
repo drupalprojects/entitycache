@@ -27,7 +27,7 @@ class EntityCacheNodeController extends EntityCacheBaseController {
   function attachLoad(&$nodes) {
     NodeController::attachLoad($nodes);
   }
-  function buildQuery(){
+  function buildQuery() {
     NodeController::buildQuery();
   }
 }
@@ -198,7 +198,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
    *
    * Adds an additional hook_entitycache_$type_load() for modules which need
    * to add data to objects during the request which can't be cached.
-   * @see entitycache_entitycache_node_load().
+   * @see entitycache_entitycache_node_load()
    */
   protected function attachAfterLoad($new_entities) {
     foreach (module_implements('entitycache_' . $this->entityType . '_load') as $module) {
@@ -386,7 +386,7 @@ function entitycache_taxonomy_vocabulary_delete($vocabulary) {
  * Implements hook_user_cancel().
  *
  * @todo: hook_user_delete() soon hopefully.
- * @see http://drupal.org/node/705306.
+ * @see http://drupal.org/node/705306
  */
 function entitycache_user_cancel($edit, $account, $method) {
   cache_clear_all($account->uid, 'cache_entity_user');
