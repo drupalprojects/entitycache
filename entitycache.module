@@ -402,6 +402,6 @@ function entitycache_user_logout($account) {
 /**
  * Implements hook_user_login().
  */
-function entitycache_user_login(&edit, $account) {
+function entitycache_user_login(&$edit, $account) {
   cache_clear_all($account->uid, 'cache_entity_user');
 }
