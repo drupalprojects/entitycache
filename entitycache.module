@@ -12,6 +12,7 @@
 function entitycache_entity_info_alter(&$entity_info) {
   $entity_info['node']['controller class'] = 'EntityCacheNodeController';
   $entity_info['taxonomy_term']['controller class'] = 'EntityCacheTaxonomyTermController';
+  $entity_info['taxonomy_vocabulary']['controller class'] = 'EntityCacheTaxonomyVocabularyController';
   $entity_info['comment']['controller class'] = 'EntityCacheCommentController';
   $entity_info['file']['controller class'] = 'EntityCacheBaseController';
 
@@ -53,6 +54,15 @@ class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
 
   protected function cacheGet($ids) {
     return TaxonomyTermController::cacheGet($ids);
+  }
+}
+
+/**
+ * Controller class for taxonomy vocabularies.
+ */
+class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController {
+  protected function buildQuery() {
+    TaxonomyVocabularyController::buildQuery();
   }
 }
 
@@ -140,7 +150,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       $entities += $queried_entities;
     }
 
-    if ($this->cache && !empty($queried_entities)) {
+    if ($this->cache && $passed_ids && !empty($queried_entities)) {
       // Add entities to the cache if we are not loading a revision.
       if (!$this->revisionId) {
         foreach ($queried_entities as $item) {
