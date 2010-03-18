@@ -27,7 +27,7 @@ class EntityCacheNodeController extends EntityCacheBaseController {
   function attachLoad(&$nodes, $revision_id = FALSE) {
     NodeController::attachLoad($nodes, $revision_id = FALSE);
   }
-  function buildQuery($ids, $conditions, $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
     return NodeController::buildQuery($ids, $conditions, $revision_id);
   }
 }
@@ -43,7 +43,7 @@ class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
     return TaxonomyTermController::load($ids, $conditions);
   }
 
-  protected function buildQuery($ids, $conditions, $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
     return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
   }
 
@@ -67,7 +67,7 @@ class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController 
  * Currently a direct copy of CommentController.
  */
 class EntityCacheCommentController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions, $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
     return CommentController::buildQuery($ids, $conditions, $revision_id);
   }
 
