@@ -11,7 +11,7 @@
  */
 function entitycache_entity_info_alter(&$entity_info) {
   foreach (entitycache_supported_core_entities(TRUE) as $type => $controller) {
-    $entity_info[$type]['cacheable'] = FALSE;
+    $entity_info[$type]['field cache'] = FALSE;
     $entity_info[$type]['entity cache'] = TRUE;
     $entity_info[$type]['controller class'] = $controller;
   }
