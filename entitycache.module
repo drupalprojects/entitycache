@@ -257,7 +257,7 @@ function entitycache_entity_insert($entity, $type) {
   // after other modules are finished loading.
   $info = entity_get_info($type);
   list($id) = entity_extract_ids($type, $entity);
-  if (!empty($info['entity cache']) && !empty) {
+  if (!empty($info['entity cache'])) {
     // file_field_insert() no longer exists. Don't take this out
     // just yet though because other modules might also misbehave.
     // cache_clear_all($id, 'cache_entity_' . $type);
