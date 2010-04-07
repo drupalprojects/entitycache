@@ -4,6 +4,10 @@
 /**
  * @file Schema and install hooks for the entitycache module.
  */
+
+/**
+ * Implements hook_schema().
+ */
 function entitycache_schema() {
   $schema = array();
   $entities = array_keys(entitycache_supported_core_entities());
@@ -14,4 +18,18 @@ function entitycache_schema() {
     $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
   }
   return $schema;
+}
+
+/**
+ * Implements hook_enable().
+ */
+function entitycache_enable() {
+  variable_set('entitycache_enabled', TRUE);
+}
+
+/**
+ * Implements hook_disable().
+ */
+function entitycache_disable() {
+  variable_del('entitycache_enabled');
 }
