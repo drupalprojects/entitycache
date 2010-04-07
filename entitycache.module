@@ -39,10 +39,6 @@ class EntityCacheNodeController extends EntityCacheBaseController {
  */
 class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
   protected $type;
-  public function load($ids = array(), $conditions = array()) {
-    return TaxonomyTermController::load($ids, $conditions);
-  }
-
   protected function buildQuery($ids, $conditions = array(), $revision_id) {
     return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
   }
