@@ -342,14 +342,18 @@ function entitycache_comment_delete($comment) {
  * Implements hook_comment_insert().
  */
 function hook_comment_insert($comment) {
-  cache_clear_all($comment->nid, 'cache_entity_node');
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->nid, 'cache_entity_node');
+  }
 }
 
 /**
  * Implements hook_comment_update().
  */
 function entitycache_comment_update($comment) {
-  cache_clear_all($comment->nid, 'cache_entity_node');
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->nid, 'cache_entity_node');
+  }
 }
 
 /**
@@ -358,7 +362,9 @@ function entitycache_comment_update($comment) {
  * @todo: core should not call this hook outside of a comment_save().
  */
 function entitycache_comment_publish($comment) {
-  cache_clear_all($comment->cid, 'cache_entity_comment');
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->cid, 'cache_entity_comment');
+  }
 }
 
 /**
@@ -367,7 +373,9 @@ function entitycache_comment_publish($comment) {
  * @todo: core should not call this hook outside of a comment_save().
  */
 function entitycache_comment_unpublish($comment) {
-  cache_clear_all($comment->cid, 'cache_entity_comment');
+  if (empty($comment->migrate)) {
+    cache_clear_all($comment->cid, 'cache_entity_comment');
+  }
 }
 
 /**
