@@ -38,7 +38,7 @@ class EntityCacheNodeController extends EntityCacheBaseController {
 function entitycache_flush_caches() {
   $bins = array();
   $entities = entitycache_supported_core_entities(TRUE);
-  foreach (array_keys($entities as $type)) {
+  foreach (array_keys($entities) as $type) {
     $bins[] = 'cache_entity_' . $type;
   }
   return $bins;
