@@ -33,6 +33,18 @@ class EntityCacheNodeController extends EntityCacheBaseController {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function entitycache_flush_caches() {
+  $bins = array();
+  $entities = entitycache_supported_core_entities(TRUE);
+  foreach (array_keys($entities as $type)) {
+    $bins[] = 'cache_entity_' . $type;
+  }
+  return $bins;
+}
+
+/**
  * Controller class for taxonomy terms.
  *
  * Currently an exact copy of TaxonomyTermController.
