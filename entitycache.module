@@ -130,7 +130,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     }
 
     // Attempt to load any remaining entities from the persistent cache.
-    if (!$revision_id && $conditions) {
+    if (!empty($this->entity_info['entity cache']) && !$revision_id && $conditions) {
       if (module_implements('entitycache_resolve_conditions')) {
         $ids = module_invoke_all('entitycache_resolve_conditions', $ids, $conditions, $this->entityType);
         $conditions = array();
@@ -168,7 +168,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
 
     if ($passed_ids && !empty($queried_entities)) {
       // Add entities to the cache if we are not loading a revision.
-      if (!$revision_id) {
+      if (!empty($this->entity_info['entity cache']) && !$revision_id) {
         foreach ($queried_entities as $item) {
           cache_set($item->{$this->idKey}, $item, 'cache_entity_' . $this->entityType);
         }
