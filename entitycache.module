@@ -129,15 +129,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       }
     }
 
-    // Attempt to load any remaining entities from the persistent cache.
-    if (!$revision_id && $conditions) {
-      if (module_implements('entitycache_resolve_conditions')) {
-        $ids = module_invoke_all('entitycache_resolve_conditions', $ids, $conditions, $this->entityType);
-        $conditions = array();
-      }
-    }
-
-    if (!empty($this->entityInfo['entity cache']) && $ids && !$conditions) {
+    if (!$revision_id && !empty($this->entityInfo['entity cache']) && $ids && !$conditions) {
       $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
       foreach ($cached as $item) {
         $cached_entities[$item->cid] = $item->data;

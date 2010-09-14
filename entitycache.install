@@ -38,7 +38,4 @@ function entitycache_disable() {
  * Set entitycache_enabled variable for existing installs.
  */
 function entity_cache_update_7001() {
-  variable_set('enttiycache_enabled', TRUE);
 }
-
-
