@@ -18,82 +18,6 @@ function entitycache_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Controller class for nodes.
- *
- * This extends the EntityCacheBaseController class, adding required
- * special handling for node objects.
- */
-class EntityCacheNodeController extends EntityCacheBaseController {
-  function attachLoad(&$nodes, $revision_id = FALSE) {
-    NodeController::attachLoad($nodes, $revision_id = FALSE);
-  }
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
-    return NodeController::buildQuery($ids, $conditions, $revision_id);
-  }
-}
-
-/**
- * Implements hook_flush_caches().
- */
-function entitycache_flush_caches() {
-  $bins = array();
-  $entities = entitycache_supported_core_entities(TRUE);
-  foreach (array_keys($entities) as $type) {
-    $bins[] = 'cache_entity_' . $type;
-  }
-  return $bins;
-}
-
-/**
- * Controller class for taxonomy terms.
- *
- * Currently an exact copy of TaxonomyTermController.
- */
-class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
-  protected $type;
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
-    return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
-  }
-
-  protected function cacheGet($ids, $conditions = array()) {
-    return TaxonomyTermController::cacheGet($ids, $conditions = array());
-  }
-}
-
-/**
- * Controller class for taxonomy vocabularies.
- */
-class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions, $revision_id) {
-    return TaxonomyVocabularyController::buildQuery($ids, $conditions, $revision_id);
-  }
-}
-
-/**
- * Controller class for comments.
- *
- * Currently a direct copy of CommentController.
- */
-class EntityCacheCommentController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
-    return CommentController::buildQuery($ids, $conditions, $revision_id);
-  }
-
-  protected function attachLoad(&$comments, $revision_id = FALSE) {
-    CommentController::attachLoad($comments, $revision_id = FALSE);
-  }
-}
-
-/**
- * Controller class for users.
- */
-class EntityCacheUserController extends EntityCacheBaseController {
-  protected function attachLoad(&$users) {
-    UserController::attachLoad($users, $revision_id = FALSE);
-  }
-}
-
-/**
  *  Set up a base controller to allow for cache_get_multiple() and cache_set().
  */
 class EntityCacheBaseController extends DrupalDefaultEntityController {
@@ -209,6 +133,82 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       $function = $module . '_entitycache_' . $this->entityType . '_load';
       $function($new_entities);
     }
+  }
+}
+
+/**
+ * Controller class for nodes.
+ *
+ * This extends the EntityCacheBaseController class, adding required
+ * special handling for node objects.
+ */
+class EntityCacheNodeController extends EntityCacheBaseController {
+  function attachLoad(&$nodes, $revision_id = FALSE) {
+    NodeController::attachLoad($nodes, $revision_id = FALSE);
+  }
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+    return NodeController::buildQuery($ids, $conditions, $revision_id);
+  }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function entitycache_flush_caches() {
+  $bins = array();
+  $entities = entitycache_supported_core_entities(TRUE);
+  foreach (array_keys($entities) as $type) {
+    $bins[] = 'cache_entity_' . $type;
+  }
+  return $bins;
+}
+
+/**
+ * Controller class for taxonomy terms.
+ *
+ * Currently an exact copy of TaxonomyTermController.
+ */
+class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
+  protected $type;
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+    return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
+  }
+
+  protected function cacheGet($ids, $conditions = array()) {
+    return TaxonomyTermController::cacheGet($ids, $conditions = array());
+  }
+}
+
+/**
+ * Controller class for taxonomy vocabularies.
+ */
+class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController {
+  protected function buildQuery($ids, $conditions, $revision_id) {
+    return TaxonomyVocabularyController::buildQuery($ids, $conditions, $revision_id);
+  }
+}
+
+/**
+ * Controller class for comments.
+ *
+ * Currently a direct copy of CommentController.
+ */
+class EntityCacheCommentController extends EntityCacheBaseController {
+  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+    return CommentController::buildQuery($ids, $conditions, $revision_id);
+  }
+
+  protected function attachLoad(&$comments, $revision_id = FALSE) {
+    CommentController::attachLoad($comments, $revision_id = FALSE);
+  }
+}
+
+/**
+ * Controller class for users.
+ */
+class EntityCacheUserController extends EntityCacheBaseController {
+  protected function attachLoad(&$users) {
+    UserController::attachLoad($users, $revision_id = FALSE);
   }
 }
 
