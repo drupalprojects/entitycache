@@ -144,7 +144,7 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
  */
 class EntityCacheNodeController extends EntityCacheBaseController {
   function attachLoad(&$nodes, $revision_id = FALSE) {
-    NodeController::attachLoad($nodes, $revision_id = FALSE);
+    NodeController::attachLoad($nodes, $revision_id);
   }
   protected function buildQuery($ids, $conditions = array(), $revision_id) {
     return NodeController::buildQuery($ids, $conditions, $revision_id);
