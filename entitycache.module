@@ -310,7 +310,13 @@ function book_entitycache_node_load($nodes) {
  * user-specific information during the request.
  */
 function poll_entitycache_node_load($nodes) {
-  poll_load($nodes);
+  $polls = array();
+  foreach ($nodes as $node) {
+    if ($node->type == 'poll') {
+      $polls[$node->nid] = $node;
+    }
+  }
+  poll_load($poll);
 }
 
 /**
