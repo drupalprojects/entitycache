@@ -316,7 +316,7 @@ function poll_entitycache_node_load($nodes) {
       $polls[$node->nid] = $node;
     }
   }
-  poll_load($poll);
+  poll_load($polls);
 }
 
 /**
