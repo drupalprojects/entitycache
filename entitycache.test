@@ -1,0 +1,20 @@
+<?php
+// $Id$
+
+
+/**
+ * Test cancelling a user.
+ */
+class EntityCacheTestCase extends UserCancelTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Entity cache cancel account',
+      'description' => 'Ensure that account cancellation methods work as expected. Copy of the core test.',
+      'group' => 'Entity cache',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('comment');
+  }
+}
