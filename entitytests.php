@@ -3,15 +3,7 @@
 
 /**
  * @file
- * Automatically generates tests for entitycache, re-using core tests with entitycache enabled.
- */
-
-/**
- * Instructions for use:
- *  - update the $modules array  with any additional modules to borrow tests from.
- *  - copy file to the root of a Drupal install.
- *  - run "drush scr entitytests.php"
- *  - cp /tmp/entitycache.test to the module folder.
+ * PHP page for handling incoming XML-RPC requests from clients.
  */
 
 /**
@@ -36,6 +28,8 @@ $modules = array(
   'poll',
 );
 
+$setup = var_export($setup, 1);
+
 $classes = db_query("SELECT name FROM {registry} WHERE module IN(:modules) AND type = :type AND filename LIKE :name", array(':modules' => $modules, ':type' => 'class', ':name' => '%.test'))->fetchCol();
 
 foreach ($classes as $class) {
@@ -51,7 +45,8 @@ foreach ($classes as $class) {
   $output .= "    );\n";
   $output .= "  }\n";
   $output .= "  function setUp() {\n";
-  $output .= "    parent::setUp('entitycache');\n";
+  $output .= "    parent::setup();\n";
+  $output .= "    module_enable(array('entitycache'));\n";
   $output .= "  }\n";
   $output .= "}\n";
   $output .= "\n";
