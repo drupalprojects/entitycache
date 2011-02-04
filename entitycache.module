@@ -22,7 +22,15 @@ function entitycache_entity_info_alter(&$entity_info) {
  */
 class EntityCacheBaseController extends DrupalDefaultEntityController {
 
-    public function load($ids = array(), $conditions = array()) {
+  public function resetCache(array $ids = NULL) {
+    parent::resetCache($ids);
+    // Also reset the persistent cache.
+    if (isset($ids)) {
+      cache_clear_all($ids, 'cache_entity_' . $this->entityType);
+    }
+  }
+
+  public function load($ids = array(), $conditions = array()) {
     $entities = array();
     $cached_entities = array();
     $queried_entities = array();
