@@ -36,23 +36,6 @@ class EntityCacheBookTestCase extends BookTestCase {
 }
 
 /**
- * Copy of CommentActionsTestCase.
- */
-class EntityCacheCommentActionsTestCase extends CommentActionsTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of CommentActionsTestCase',
-      'description' => 'Copy of CommentActionsTestCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
  * Copy of CommentAnonymous.
  */
 class EntityCacheCommentAnonymous extends CommentAnonymous {
@@ -145,23 +128,6 @@ class EntityCacheCommentHelperCase extends CommentHelperCase {
     return array(
       'name' => 'Copy of CommentHelperCase',
       'description' => 'Copy of CommentHelperCase',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
- * Copy of CommentInterfaceTest.
- */
-class EntityCacheCommentInterfaceTest extends CommentInterfaceTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of CommentInterfaceTest',
-      'description' => 'Copy of CommentInterfaceTest',
       'group' => 'Entity cache',
     );
   }
