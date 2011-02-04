@@ -13,7 +13,8 @@ class EntityCacheBlogTestCase extends BlogTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -29,7 +30,8 @@ class EntityCacheBookTestCase extends BookTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -45,7 +47,8 @@ class EntityCacheCommentActionsTestCase extends CommentActionsTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -61,7 +64,8 @@ class EntityCacheCommentAnonymous extends CommentAnonymous {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -77,7 +81,8 @@ class EntityCacheCommentApprovalTest extends CommentApprovalTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -93,7 +98,8 @@ class EntityCacheCommentBlockFunctionalTest extends CommentBlockFunctionalTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -109,7 +115,8 @@ class EntityCacheCommentContentRebuild extends CommentContentRebuild {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -125,7 +132,8 @@ class EntityCacheCommentFieldsTest extends CommentFieldsTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -141,7 +149,8 @@ class EntityCacheCommentHelperCase extends CommentHelperCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -157,7 +166,8 @@ class EntityCacheCommentInterfaceTest extends CommentInterfaceTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -173,7 +183,8 @@ class EntityCacheCommentNodeAccessTest extends CommentNodeAccessTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -189,7 +200,8 @@ class EntityCacheCommentPagerTest extends CommentPagerTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -205,7 +217,8 @@ class EntityCacheCommentPreviewTest extends CommentPreviewTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -221,7 +234,8 @@ class EntityCacheCommentRSSUnitTest extends CommentRSSUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -237,7 +251,8 @@ class EntityCacheCommentTokenReplaceTestCase extends CommentTokenReplaceTestCase
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -253,7 +268,8 @@ class EntityCacheMultiStepNodeFormBasicOptionsTest extends MultiStepNodeFormBasi
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -269,7 +285,8 @@ class EntityCacheNodeAccessRebuildTestCase extends NodeAccessRebuildTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -285,7 +302,8 @@ class EntityCacheNodeAccessRecordsUnitTest extends NodeAccessRecordsUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -301,7 +319,8 @@ class EntityCacheNodeAccessUnitTest extends NodeAccessUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -317,7 +336,8 @@ class EntityCacheNodeAdminTestCase extends NodeAdminTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -333,7 +353,8 @@ class EntityCacheNodeBlockFunctionalTest extends NodeBlockFunctionalTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -349,7 +370,8 @@ class EntityCacheNodeBlockTestCase extends NodeBlockTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -365,7 +387,8 @@ class EntityCacheNodeBuildContent extends NodeBuildContent {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -381,7 +404,8 @@ class EntityCacheNodeCreationTestCase extends NodeCreationTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -397,7 +421,8 @@ class EntityCacheNodeEntityFieldQueryAlter extends NodeEntityFieldQueryAlter {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -413,7 +438,8 @@ class EntityCacheNodeFeedTestCase extends NodeFeedTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -429,7 +455,8 @@ class EntityCacheNodeLoadHooksTestCase extends NodeLoadHooksTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -445,7 +472,8 @@ class EntityCacheNodeLoadMultipleUnitTest extends NodeLoadMultipleUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -461,7 +489,8 @@ class EntityCacheNodePostSettingsTestCase extends NodePostSettingsTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -477,7 +506,8 @@ class EntityCacheNodeQueryAlter extends NodeQueryAlter {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -493,7 +523,8 @@ class EntityCacheNodeRevisionsTestCase extends NodeRevisionsTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -509,7 +540,8 @@ class EntityCacheNodeRSSContentTestCase extends NodeRSSContentTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -525,7 +557,8 @@ class EntityCacheNodeSaveTestCase extends NodeSaveTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -541,7 +574,8 @@ class EntityCacheNodeTitleTestCase extends NodeTitleTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -557,7 +591,8 @@ class EntityCacheNodeTitleXSSTestCase extends NodeTitleXSSTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -573,7 +608,8 @@ class EntityCacheNodeTokenReplaceTestCase extends NodeTokenReplaceTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -589,7 +625,8 @@ class EntityCacheNodeTypePersistenceTestCase extends NodeTypePersistenceTestCase
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -605,7 +642,8 @@ class EntityCacheNodeTypeTestCase extends NodeTypeTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -621,7 +659,8 @@ class EntityCachePageEditTestCase extends PageEditTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -637,7 +676,8 @@ class EntityCachePagePreviewTestCase extends PagePreviewTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -653,7 +693,8 @@ class EntityCachePageViewTestCase extends PageViewTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -669,7 +710,8 @@ class EntityCacheSummaryLengthTestCase extends SummaryLengthTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -685,7 +727,8 @@ class EntityCachePollBlockTestCase extends PollBlockTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -701,7 +744,8 @@ class EntityCachePollCreateTestCase extends PollCreateTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -717,7 +761,8 @@ class EntityCachePollExpirationTestCase extends PollExpirationTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -733,7 +778,8 @@ class EntityCachePollJSAddChoice extends PollJSAddChoice {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -749,7 +795,8 @@ class EntityCachePollTestCase extends PollTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -765,7 +812,8 @@ class EntityCachePollTokenReplaceTestCase extends PollTokenReplaceTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -781,7 +829,8 @@ class EntityCachePollVoteCheckHostname extends PollVoteCheckHostname {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -797,7 +846,8 @@ class EntityCachePollVoteTestCase extends PollVoteTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -813,7 +863,8 @@ class EntityCacheTaxonomyHooksTestCase extends TaxonomyHooksTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -829,7 +880,8 @@ class EntityCacheTaxonomyLegacyTestCase extends TaxonomyLegacyTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -845,7 +897,8 @@ class EntityCacheTaxonomyLoadMultipleUnitTest extends TaxonomyLoadMultipleUnitTe
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -861,7 +914,8 @@ class EntityCacheTaxonomyTermFieldTestCase extends TaxonomyTermFieldTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -877,7 +931,8 @@ class EntityCacheTaxonomyTermTestCase extends TaxonomyTermTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -893,7 +948,8 @@ class EntityCacheTaxonomyTermUnitTest extends TaxonomyTermUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -909,7 +965,8 @@ class EntityCacheTaxonomyThemeTestCase extends TaxonomyThemeTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -925,7 +982,8 @@ class EntityCacheTaxonomyTokenReplaceTestCase extends TaxonomyTokenReplaceTestCa
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -941,7 +999,8 @@ class EntityCacheTaxonomyVocabularyFunctionalTest extends TaxonomyVocabularyFunc
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -957,7 +1016,8 @@ class EntityCacheTaxonomyVocabularyUnitTest extends TaxonomyVocabularyUnitTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -973,7 +1033,8 @@ class EntityCacheTaxonomyWebTestCase extends TaxonomyWebTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -989,7 +1050,8 @@ class EntityCacheUserAccountLinksUnitTests extends UserAccountLinksUnitTests {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1005,7 +1067,8 @@ class EntityCacheUserAdminTestCase extends UserAdminTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1021,7 +1084,8 @@ class EntityCacheUserAuthmapAssignmentTestCase extends UserAuthmapAssignmentTest
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1037,7 +1101,8 @@ class EntityCacheUserAutocompleteTestCase extends UserAutocompleteTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1053,7 +1118,8 @@ class EntityCacheUserBlocksUnitTests extends UserBlocksUnitTests {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1069,7 +1135,8 @@ class EntityCacheUserCancelTestCase extends UserCancelTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1085,7 +1152,8 @@ class EntityCacheUserCreateTestCase extends UserCreateTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1101,7 +1169,8 @@ class EntityCacheUserEditedOwnAccountTestCase extends UserEditedOwnAccountTestCa
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1117,7 +1186,8 @@ class EntityCacheUserEditTestCase extends UserEditTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1133,7 +1203,8 @@ class EntityCacheUserLoginTestCase extends UserLoginTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1149,7 +1220,8 @@ class EntityCacheUserPermissionsTestCase extends UserPermissionsTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1165,7 +1237,8 @@ class EntityCacheUserPictureTestCase extends UserPictureTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1181,7 +1254,8 @@ class EntityCacheUserRegistrationTestCase extends UserRegistrationTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1197,7 +1271,8 @@ class EntityCacheUserRoleAdminTestCase extends UserRoleAdminTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1213,7 +1288,8 @@ class EntityCacheUserRolesAssignmentTestCase extends UserRolesAssignmentTestCase
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1229,7 +1305,8 @@ class EntityCacheUserSaveTestCase extends UserSaveTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1245,7 +1322,8 @@ class EntityCacheUserSignatureTestCase extends UserSignatureTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1261,7 +1339,8 @@ class EntityCacheUserTimeZoneFunctionalTest extends UserTimeZoneFunctionalTest {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1277,7 +1356,8 @@ class EntityCacheUserTokenReplaceTestCase extends UserTokenReplaceTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1293,7 +1373,8 @@ class EntityCacheUserUserSearchTestCase extends UserUserSearchTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1309,7 +1390,8 @@ class EntityCacheUserValidateCurrentPassCustomForm extends UserValidateCurrentPa
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 
@@ -1325,7 +1407,8 @@ class EntityCacheUserValidationTestCase extends UserValidationTestCase {
     );
   }
   function setUp() {
-    parent::setUp('entitycache');
+    parent::setup();
+    module_enable(array('entitycache'));
   }
 }
 

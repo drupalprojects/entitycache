@@ -18,7 +18,7 @@ function entitycache_entity_info_alter(&$entity_info) {
 }
 
 /**
- *  Set up a base controller to allow for cache_get_multiple() and cache_set().
+ * Set up a base controller to allow for cache_get_multiple() and cache_set().
  */
 class EntityCacheBaseController extends DrupalDefaultEntityController {
 
