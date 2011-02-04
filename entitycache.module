@@ -18,7 +18,7 @@ function entitycache_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Set up a base controller to allow for cache_get_multiple() and cache_set().
+ * Base controller.
  */
 class EntityCacheBaseController extends DrupalDefaultEntityController {
 
@@ -335,6 +335,7 @@ function poll_entitycache_node_load($nodes) {
 function entitycache_comment_publish($comment) {
   if (empty($comment->migrate)) {
     cache_clear_all($comment->cid, 'cache_entity_comment');
+    cache_clear_all($comment->nid, 'cache_entity_node');
   }
 }
 
@@ -346,6 +347,7 @@ function entitycache_comment_publish($comment) {
 function entitycache_comment_unpublish($comment) {
   if (empty($comment->migrate)) {
     cache_clear_all($comment->cid, 'cache_entity_comment');
+    cache_clear_all($comment->nid, 'cache_entity_node');
   }
 }
 
