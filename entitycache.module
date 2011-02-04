@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Implements entity hooks and classes to allow for caching of core entities.
+ * Allows for caching of core entities.
  */
 
 /**
