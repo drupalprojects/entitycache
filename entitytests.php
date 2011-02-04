@@ -32,9 +32,8 @@ $setup = var_export($setup, 1);
 
 $classes = db_query("SELECT name FROM {registry} WHERE module IN(:modules) AND type = :type AND filename LIKE :name", array(':modules' => $modules, ':type' => 'class', ':name' => '%.test'))->fetchCol();
 
-// Exclude tests where the tests would need to be altered in core before they could pass.
+// Exclude tests that fail due to core bugs.
 $exclude = array(
-  'CommentInterfaceTest',
   // @see http://drupal.org/node/1008198
   'CommentActionsTestCase',
 );

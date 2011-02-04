@@ -352,6 +352,20 @@ function entitycache_comment_unpublish($comment) {
 }
 
 /**
+ * Implements hook_comment_insert().
+ */
+function entitycache_comment_insert($comment) {
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+/**
+ * Implements hook_comment_update().
+ */
+function entitycache_comment_update($comment) {
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+/**
  * Implements hook_user_cancel().
  *
  * @todo: hook_user_delete() soon hopefully.
