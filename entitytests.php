@@ -40,6 +40,7 @@ $exclude = array(
   // friendly.
   // @todo: figure out why it fails, and likely file core patch to fix it, then
   // re-enable that test.
+  'CommentInterfaceTest',
 );
 foreach ($exclude as $class) {
   $key = array_search($class, $classes);

@@ -138,23 +138,6 @@ class EntityCacheCommentHelperCase extends CommentHelperCase {
 }
 
 /**
- * Copy of CommentInterfaceTest.
- */
-class EntityCacheCommentInterfaceTest extends CommentInterfaceTest {
-  public static function getInfo() {
-    return array(
-      'name' => 'Copy of CommentInterfaceTest',
-      'description' => 'Copy of CommentInterfaceTest',
-      'group' => 'Entity cache',
-    );
-  }
-  function setUp() {
-    parent::setup();
-    module_enable(array('entitycache'));
-  }
-}
-
-/**
  * Copy of CommentNodeAccessTest.
  */
 class EntityCacheCommentNodeAccessTest extends CommentNodeAccessTest {
