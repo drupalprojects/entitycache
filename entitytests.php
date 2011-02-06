@@ -36,6 +36,10 @@ $classes = db_query("SELECT name FROM {registry} WHERE module IN(:modules) AND t
 $exclude = array(
   // @see http://drupal.org/node/1008198
   'CommentActionsTestCase',
+  // Removing 'CommentInterfaceTest' for now since the test is not caching
+  // friendly.
+  // @todo: figure out why it fails, and likely file core patch to fix it, then
+  // re-enable that test.
 );
 foreach ($exclude as $class) {
   $key = array_search($class, $classes);

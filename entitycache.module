@@ -367,9 +367,6 @@ function entitycache_comment_update($comment) {
 
 /**
  * Implements hook_user_cancel().
- *
- * @todo: hook_user_delete() soon hopefully.
- * @see http://drupal.org/node/705306
  */
 function entitycache_user_cancel($edit, $account, $method) {
   cache_clear_all($account->uid, 'cache_entity_user');
