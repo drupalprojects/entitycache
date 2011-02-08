@@ -154,7 +154,7 @@ class EntityCacheNodeController extends EntityCacheBaseController {
   function attachLoad(&$nodes, $revision_id = FALSE) {
     NodeController::attachLoad($nodes, $revision_id);
   }
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     return NodeController::buildQuery($ids, $conditions, $revision_id);
   }
 }
@@ -178,7 +178,7 @@ function entitycache_flush_caches() {
  */
 class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
   protected $type;
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
   }
 
@@ -191,7 +191,7 @@ class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
  * Controller class for taxonomy vocabularies.
  */
 class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions, $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     return TaxonomyVocabularyController::buildQuery($ids, $conditions, $revision_id);
   }
 }
@@ -202,7 +202,7 @@ class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController 
  * Currently a direct copy of CommentController.
  */
 class EntityCacheCommentController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions = array(), $revision_id) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     return CommentController::buildQuery($ids, $conditions, $revision_id);
   }
 
@@ -215,8 +215,8 @@ class EntityCacheCommentController extends EntityCacheBaseController {
  * Controller class for users.
  */
 class EntityCacheUserController extends EntityCacheBaseController {
-  protected function attachLoad(&$users) {
-    UserController::attachLoad($users, $revision_id = FALSE);
+  protected function attachLoad(&$users, $revision_id = FALSE) {
+    UserController::attachLoad($users, $revision_id);
   }
 }
 
