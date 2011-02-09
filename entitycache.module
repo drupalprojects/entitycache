@@ -18,28 +18,30 @@ function entitycache_entity_info_alter(&$entity_info) {
 }
 
 /**
- * Base controller.
+ * Entity cache helper.
+ *
+ * Note: while this class is not a real entity controller it needs to extend
+ * DrupalDefaultEntityController to get access to protected properties.
  */
-class EntityCacheBaseController extends DrupalDefaultEntityController {
+class EntityCacheControllerHelper extends DrupalDefaultEntityController {
 
-  public function resetCache(array $ids = NULL) {
-    parent::resetCache($ids);
-    // Also reset the persistent cache.
+  public static function resetEntityCache($controller, array $ids = NULL) {
+    // Reset the persistent cache.
     if (isset($ids)) {
-      cache_clear_all($ids, 'cache_entity_' . $this->entityType);
+      cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
     }
   }
 
-  public function load($ids = array(), $conditions = array()) {
+  public static function entityCacheLoad($controller, $ids = array(), $conditions = array()) {
     $entities = array();
     $cached_entities = array();
     $queried_entities = array();
 
     // Revisions are not statically cached, and require a different query to
     // other conditions, so separate the revision id into its own variable.
-    if ($this->revisionKey && isset($conditions[$this->revisionKey])) {
-      $revision_id = $conditions[$this->revisionKey];
-      unset($conditions[$this->revisionKey]);
+    if ($controller->revisionKey && isset($conditions[$controller->revisionKey])) {
+      $revision_id = $conditions[$controller->revisionKey];
+      unset($conditions[$controller->revisionKey]);
     }
     else {
       $revision_id = FALSE;
@@ -53,21 +55,24 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
     // Try to load entities from the static cache, if the entity type supports
     // static caching.
-    if ($this->cache && !$revision_id) {
-      $entities += $this->cacheGet($ids, $conditions);
+    if ($controller->cache && !$revision_id) {
+      $entities += $controller->cacheGet($ids, $conditions);
       // If any entities were loaded, remove them from the ids still to load.
       if ($passed_ids) {
         $ids = array_keys(array_diff_key($passed_ids, $entities));
       }
     }
 
-    if (!$revision_id && !empty($this->entityInfo['entity cache']) && $ids && !$conditions) {
-      $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
-      foreach ($cached as $item) {
-        $cached_entities[$item->cid] = $item->data;
-      }
-      if ($cached) {
-        $ids = array_diff($ids, array_keys($cached_entities));
+    if (!empty($controller->entityInfo['entity cache']) && !$revision_id && $ids && !$conditions) {
+      $entities += $cached_entities = self::entityCacheGet($controller, $ids, $conditions);
+      // If any entities were loaded, remove them from the ids still to load.
+      $ids = array_diff($ids, array_keys($cached_entities));
+
+      if ($controller->cache) {
+        // Add entities to the cache if we are not loading a revision.
+        if (!empty($cached_entities) && !$revision_id) {
+          $controller->cacheSet($cached_entities);
+        }
       }
     }
 
@@ -76,42 +81,31 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
     // load, if loading a revision, or if $conditions was passed without $ids.
     if ($ids === FALSE || $ids || $revision_id || ($conditions && !$passed_ids)) {
       // Build the query.
-      $query = $this->buildQuery($ids, $conditions, $revision_id);
+      $query = $controller->buildQuery($ids, $conditions, $revision_id);
       $queried_entities = $query
         ->execute()
-        ->fetchAllAssoc($this->idKey);
+        ->fetchAllAssoc($controller->idKey);
     }
 
-    // Pass all entities loaded from the database through $this->attachLoad(),
+    // Pass all entities loaded from the database through $controller->attachLoad(),
     // which attaches fields (if supported by the entity type) and calls the
     // entity type specific load callback, for example hook_node_load().
     if (!empty($queried_entities)) {
-      $this->attachLoad($queried_entities, $revision_id);
+      $controller->attachLoad($queried_entities, $revision_id);
       $entities += $queried_entities;
     }
 
-    if ($passed_ids && !empty($queried_entities)) {
-      // Add entities to the cache if we are not loading a revision.
-      if (!empty($this->entityInfo['entity cache']) && !$revision_id) {
-        foreach ($queried_entities as $item) {
-          cache_set($item->{$this->idKey}, $item, 'cache_entity_' . $this->entityType);
-        }
+    if (!empty($controller->entityInfo['entity cache'])) {
+      // Add entities to the entity cache if we are not loading a revision.
+      if (!empty($queried_entities) && !$revision_id) {
+        self::entityCacheSet($controller, $queried_entities);
       }
     }
-    $new_entities = $queried_entities + $cached_entities;
 
-    if (!empty($new_entities)) {
-      $this->attachAfterLoad($new_entities);
-      if (!$revision_id) {
-        $this->cacheSet($new_entities);
-      }
-      $entities += $cached_entities;
-    }
-
-    if ($this->cache) {
+    if ($controller->cache) {
       // Add entities to the cache if we are not loading a revision.
       if (!empty($queried_entities) && !$revision_id) {
-        $this->cacheSet($queried_entities);
+        $controller->cacheSet($queried_entities);
       }
     }
 
@@ -121,12 +115,32 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
       // Remove any invalid ids from the array.
       $passed_ids = array_intersect_key($passed_ids, $entities);
       foreach ($entities as $entity) {
-        $passed_ids[$entity->{$this->idKey}] = $entity;
+        $passed_ids[$entity->{$controller->idKey}] = $entity;
       }
       $entities = $passed_ids;
     }
 
     return $entities;
+  }
+
+  protected static function entityCacheGet($controller, $ids, $conditions = array()) {
+    $cached_entities = array();
+    if ($ids && !$conditions) {
+      $cached = cache_get_multiple($ids, 'cache_entity_' . $controller->entityType);
+      if ($cached) {
+        foreach ($cached as $item) {
+          $cached_entities[$item->cid] = $item->data;
+        }
+        self::entityCacheAttachLoad($controller, $cached_entities);
+      }
+    }
+    return $cached_entities;
+  }
+
+  protected static function entityCacheSet($controller, $entities) {
+    foreach ($entities as $item) {
+      cache_set($item->{$controller->idKey}, $item, 'cache_entity_' . $controller->entityType);
+    }
   }
 
   /**
@@ -136,26 +150,37 @@ class EntityCacheBaseController extends DrupalDefaultEntityController {
    * to add data to objects during the request which can't be cached.
    * @see entitycache_entitycache_node_load()
    */
-  protected function attachAfterLoad($new_entities) {
-    foreach (module_implements('entitycache_' . $this->entityType . '_load') as $module) {
-      $function = $module . '_entitycache_' . $this->entityType . '_load';
-      $function($new_entities);
+  protected static function entityCacheAttachLoad($controller, $entities) {
+    foreach (module_implements('entitycache_' . $controller->entityType . '_load') as $module) {
+      $function = $module . '_entitycache_' . $controller->entityType . '_load';
+      $function($entities);
     }
   }
 }
 
 /**
- * Controller class for nodes.
- *
- * This extends the EntityCacheBaseController class, adding required
- * special handling for node objects.
+ * Default entity controller with persistent cache.
  */
-class EntityCacheNodeController extends EntityCacheBaseController {
-  function attachLoad(&$nodes, $revision_id = FALSE) {
-    NodeController::attachLoad($nodes, $revision_id);
+class EntityCacheDefaultEntityController extends DrupalDefaultEntityController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
   }
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    return NodeController::buildQuery($ids, $conditions, $revision_id);
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
+  }
+}
+
+/**
+ * Node entity controller with persistent cache.
+ */
+class EntityCacheNodeController extends NodeController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
+  }
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
   }
 }
 
@@ -172,51 +197,15 @@ function entitycache_flush_caches() {
 }
 
 /**
- * Controller class for taxonomy terms.
- *
- * Currently an exact copy of TaxonomyTermController.
+ * User entity controller with persistent cache.
  */
-class EntityCacheTaxonomyTermController extends EntityCacheBaseController {
-  protected $type;
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    return TaxonomyTermController::buildQuery($ids, $conditions, $revision_id);
+class EntityCacheUserController extends UserController {
+  public function resetCache(array $ids = NULL) {
+    EntityCacheControllerHelper::resetEntityCache($this, $ids);
+    parent::resetCache($ids);
   }
-
-  protected function cacheGet($ids, $conditions = array()) {
-    return TaxonomyTermController::cacheGet($ids, $conditions = array());
-  }
-}
-
-/**
- * Controller class for taxonomy vocabularies.
- */
-class EntityCacheTaxonomyVocabularyController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    return TaxonomyVocabularyController::buildQuery($ids, $conditions, $revision_id);
-  }
-}
-
-/**
- * Controller class for comments.
- *
- * Currently a direct copy of CommentController.
- */
-class EntityCacheCommentController extends EntityCacheBaseController {
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    return CommentController::buildQuery($ids, $conditions, $revision_id);
-  }
-
-  protected function attachLoad(&$comments, $revision_id = FALSE) {
-    CommentController::attachLoad($comments, $revision_id = FALSE);
-  }
-}
-
-/**
- * Controller class for users.
- */
-class EntityCacheUserController extends EntityCacheBaseController {
-  protected function attachLoad(&$users, $revision_id = FALSE) {
-    UserController::attachLoad($users, $revision_id);
+  public function load($ids = array(), $conditions = array()) {
+    return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
   }
 }
 
@@ -232,7 +221,7 @@ class EntityCacheUserController extends EntityCacheBaseController {
 function entitycache_supported_core_entities($enabled = FALSE) {
   $return = array(
     'comment' => 'EntityCacheCommentController',
-    'file' => 'EntityCacheBaseController',
+    'file' => 'EntityCacheDefaultEntityController',
     'node' => 'EntityCacheNodeController',
     'taxonomy_term' => 'EntityCacheTaxonomyTermController',
     'taxonomy_vocabulary' => 'EntityCacheTaxonomyVocabularyController',
@@ -324,7 +313,9 @@ function poll_entitycache_node_load($nodes) {
       $polls[$node->nid] = $node;
     }
   }
-  poll_load($polls);
+  if (!empty($polls)) {
+    poll_load($polls);
+  }
 }
 
 /**

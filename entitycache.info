@@ -5,5 +5,6 @@ description = Provides caching for core entities including nodes and taxonomy te
 core = 7.x
 
 files[] = entitycache.module
-files[] = entitycache.install
+files[] = entitycache.comment.inc
+files[] = entitycache.taxonomy.inc
 files[] = entitycache.test
