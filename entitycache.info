@@ -1,4 +1,3 @@
-; $Id$
 name = Entity cache
 description = Provides caching for core entities including nodes and taxonomy terms.
 
