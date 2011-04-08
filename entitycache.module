@@ -145,11 +145,18 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   /**
    * Allow modules to implement uncached entity hooks.
    *
-   * Adds an additional hook_entitycache_$type_load() for modules which need
-   * to add data to objects during the request which can't be cached.
+   * Perform two additional hook invocations for modules needing to add
+   * uncacheable data to objects while serving the request.
+   *
    * @see entitycache_entitycache_node_load()
    */
   protected static function entityCacheAttachLoad($controller, $entities) {
+    // Give modules the chance to act on any entity.
+    foreach (module_implements('entitycache_load') as $module) {
+      $function = $module . '_entitycache_load';
+      $function($entities, $controller->entityType);
+    }
+    // Give modules the chance to act on a specific entity type.
     foreach (module_implements('entitycache_' . $controller->entityType . '_load') as $module) {
       $function = $module . '_entitycache_' . $controller->entityType . '_load';
       $function($entities);
