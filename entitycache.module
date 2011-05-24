@@ -29,6 +29,16 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
     if (isset($ids)) {
       cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
     }
+    // Give modules the chance to act on any entity.
+    foreach (module_implements('entitycache_reset') as $module) {
+      $function = $module . '_entitycache_reset';
+      $function($ids, $controller->entityType);
+    }
+    // Give modules the chance to act on a specific entity type.
+    foreach (module_implements('entitycache_' . $controller->entityType . '_reset') as $module) {
+      $function = $module . '_entitycache_' . $controller->entityType . '_reset';
+      $function($ids);
+    }
   }
 
   public static function entityCacheLoad($controller, $ids = array(), $conditions = array()) {
