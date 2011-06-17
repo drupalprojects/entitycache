@@ -13,6 +13,7 @@
  * @param $entity_type
  */
 function hook_entitycache_load($entities, $entity_type) {
+}
 
 }
 
