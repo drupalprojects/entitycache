@@ -383,6 +383,13 @@ function entitycache_entitycache_comment_load($comments) {
 }
 
 /**
+ * Implements hook_comment_update().
+ */
+function entitycache_comment_delete($comment) {
+  cache_clear_all($comment->nid, 'cache_entity_node');
+}
+
+/**
  * Implements hook_user_cancel().
  */
 function entitycache_user_cancel($edit, $account, $method) {
