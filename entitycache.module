@@ -26,9 +26,14 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
 
   public static function resetEntityCache($controller, array $ids = NULL) {
     // Reset the persistent cache.
-    if (isset($ids)) {
+    if (!empty($ids)) {
       cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
     }
+    else {
+      // Force all cached entries to be deleted.
+      cache_clear_all('*', 'cache_entity_' . $controller->entityType, TRUE);
+    }
+
     // Give modules the chance to act on any entity.
     foreach (module_implements('entitycache_reset') as $module) {
       $function = $module . '_entitycache_reset';
