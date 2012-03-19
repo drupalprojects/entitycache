@@ -253,6 +253,7 @@ function entitycache_supported_core_entities($enabled = FALSE) {
       unset($return['taxonomy_term']);
       unset($return['taxonomy_vocabulary']);
     }
+    $return = array_diff_key($return, drupal_map_assoc(variable_get('entitycache_disabled_entity_types', array())));
   }
   return $return;
 }
