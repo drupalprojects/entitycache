@@ -373,6 +373,15 @@ function entitycache_comment_update($comment) {
 }
 
 /**
+ * Implements hook_entitycache_ENTITY_TYPE_load().
+ */
+function entitycache_entitycache_comment_load($comments) {
+  foreach ($comments as $comment) {
+    $comment->new = $comment->new = node_mark($comment->nid, $comment->changed);
+  }
+}
+
+/**
  * Implements hook_user_cancel().
  */
 function entitycache_user_cancel($edit, $account, $method) {
