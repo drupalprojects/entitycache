@@ -112,7 +112,15 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
     if (!empty($controller->entityInfo['entity cache'])) {
       // Add entities to the entity cache if we are not loading a revision.
       if (!empty($queried_entities) && !$revision_id) {
-        self::entityCacheSet($controller, $queried_entities);
+        // Only cache the entities which were loaded by ID. Entities that were
+        // loaded based on conditions will never be found via cacheGet() and we
+        // would keep on caching them.
+        if ($passed_ids) {
+          $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
+          if (!empty($queried_entities_by_id)) {
+            self::entityCacheSet($controller, $queried_entities_by_id);
+          }
+        }
       }
     }
 
