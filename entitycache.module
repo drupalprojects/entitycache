@@ -160,8 +160,8 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   }
 
   public static function entityCacheSet($controller, $entities) {
-    foreach ($entities as $item) {
-      cache_set($item->{$controller->idKey}, $item, 'cache_entity_' . $controller->entityType);
+    foreach ($entities as $id => $item) {
+      cache_set($id, $item, 'cache_entity_' . $controller->entityType);
     }
   }
 
