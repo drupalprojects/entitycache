@@ -46,6 +46,21 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
     }
   }
 
+  /**
+   * Loads entities by IDs/conditions, which are potentially cached.
+   *
+   * @param \DrupalDefaultEntityController $controller
+   *   The entity (storage) controller.
+   *
+   * @param array $ids
+   *   (optional) entity IDs to load.
+   * @param array $conditions
+   *   (options) An array of conditions to be used when loading. Note: It is
+   *   possible to pass conditions with and without IDs.
+   *
+   * @return array
+   *   An array of loaded entities keyed by ID.
+   */
   public static function entityCacheLoad($controller, $ids = array(), $conditions = array()) {
     $entities = array();
     $cached_entities = array();
@@ -67,6 +82,39 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
     // and we need to know if it's empty for this reason to avoid querying the
     // database when all requested entities are loaded from cache.
     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+
+    // Use an entity field query to transform the list of conditions into
+    // the set of entity IDs which the conditions admit, then re-enter this
+    // method with that set as the $ids constraint.
+    if ($conditions) {
+      $query = new EntityFieldQuery();
+      $query->entityCondition('entity_type', $controller->entityType);
+      foreach ($conditions as $property_name => $condition) {
+        // Note $condition might be multiple values, which are treated as OR
+        // by default.
+        $query->propertyCondition($property_name, $condition);
+      }
+
+      // Limit the result set also by the passed in IDs.
+      if ($passed_ids) {
+        $query->propertyCondition($controller->idKey, array_keys($passed_ids));
+      }
+
+      $result = $query->execute();
+      if (isset($result[$controller->entityType])) {
+        $entity_ids = array_keys($result[$controller->entityType]);
+        if ($revision_id) {
+          return static::entityCacheLoad($controller, $entity_ids, array($controller->revisionKey => $revision_id));
+        } else {
+          return static::entityCacheLoad($controller, $entity_ids);
+        }
+      }
+      else {
+        // No results found.
+        return array();
+      }
+    }
+
     // Try to load entities from the static cache, if the entity type supports
     // static caching.
     if ($controller->cache && !$revision_id) {

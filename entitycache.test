@@ -853,6 +853,25 @@ class EntityCachePageEditTestCase extends PageEditTestCase {
     parent::setup();
     module_enable(array('entitycache'));
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+    $result = parent::drupalPost($path, $edit, $submit, $options, $headers, $form_html_id, $extra_post);
+
+    // Reset the cache, to let the test pass. The problem is that the test
+    // adds a new revision using ::drupalPost so the static cache in the context
+    // of the test, never has the chance to react.
+    if (!empty($edit['revision'])) {
+      $node = $this->drupalGetNodeByTitle($edit['title']);
+      $nid = $node->nid;
+      entity_get_controller('node')->resetCache(array($nid));
+    }
+
+    return $result;
+  }
+
 }
 
 /**
