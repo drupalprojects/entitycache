@@ -4,7 +4,12 @@ description = Provides caching for core entities including nodes and taxonomy te
 core = 7.x
 package = Performance and scalability
 
-files[] = entitycache.module
-files[] = entitycache.comment.inc
-files[] = entitycache.taxonomy.inc
+files[] = includes/entitycache.entitycachecontrollerhelper.inc
+files[] = includes/entitycache.comment.inc
+files[] = includes/entitycache.defaultentitycontroller.inc
+files[] = includes/entitycache.node.inc
+files[] = includes/entitycache.taxonomy.inc
+files[] = includes/entitycache.user.inc
+
+; Simpletests
 files[] = entitycache.test

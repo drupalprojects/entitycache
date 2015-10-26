@@ -9,6 +9,7 @@
  * Taxonomy term entity controller class with persistent cache.
  */
 class EntityCacheTaxonomyTermController extends TaxonomyTermController {
+
   /**
    * {@inheritdoc}
    */
@@ -16,18 +17,21 @@ class EntityCacheTaxonomyTermController extends TaxonomyTermController {
     EntityCacheControllerHelper::resetEntityCache($this, $ids);
     parent::resetCache($ids);
   }
+
   /**
    * {@inheritdoc}
    */
   public function load($ids = array(), $conditions = array()) {
     return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
   }
+
 }
 
 /**
  * Taxonomy vocabulary entity controller class with persistent cache.
  */
 class EntityCacheTaxonomyVocabularyController extends TaxonomyVocabularyController {
+
   /**
    * {@inheritdoc}
    */
@@ -35,10 +39,12 @@ class EntityCacheTaxonomyVocabularyController extends TaxonomyVocabularyControll
     EntityCacheControllerHelper::resetEntityCache($this, $ids);
     parent::resetCache($ids);
   }
+
   /**
    * {@inheritdoc}
    */
   public function load($ids = array(), $conditions = array()) {
     return EntityCacheControllerHelper::entityCacheLoad($this, $ids, $conditions);
   }
+
 }
