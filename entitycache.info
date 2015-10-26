@@ -13,3 +13,5 @@ files[] = includes/entitycache.user.inc
 
 ; Simpletests
 files[] = entitycache.test
+
+dependencies[] = system (>=7.36)

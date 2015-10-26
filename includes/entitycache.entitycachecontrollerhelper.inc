@@ -127,6 +127,11 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
       }
     }
 
+    // Ensure integer entity IDs are valid.
+    if (!empty($ids)) {
+      static::entityCacheCleanIds($controller, $ids);
+    }
+
     // Load any remaining entities from the database. This is the case if $ids
     // is set to FALSE (so we load all entities), if there are any ids left to
     // load, if loading a revision, or if $conditions was passed without $ids.
@@ -180,6 +185,37 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
     }
 
     return $entities;
+  }
+
+  /**
+   * Ensures integer entity IDs are valid.
+   *
+   * The identifier sanitization provided by this method has been introduced
+   * as Drupal used to rely on the database to facilitate this, which worked
+   * correctly with MySQL but led to errors with other DBMS such as PostgreSQL.
+   *
+   * @param array $ids
+   *   The entity IDs to verify.
+   *
+   * @return array
+   *   The sanitized list of entity IDs.
+   */
+  protected static function entityCacheCleanIds($controller, &$ids) {
+    $entity_info = entity_get_info($controller->entityType);
+    if (isset($entity_info['base table field types'])) {
+      $id_type = $entity_info['base table field types'][$controller->idKey];
+      if ($id_type == 'serial' || $id_type == 'int') {
+        $ids = array_filter($ids, array(__CLASS__, 'entityCacheFilterId'));
+        $ids = array_map('intval', $ids);
+      }
+    }
+  }
+
+  /**
+   * Callback for array_filter that removes non-integer IDs.
+   */
+  public static function entityCacheFilterId($id) {
+    return is_numeric($id) && $id == (int) $id;
   }
 
   public static function entityCacheGet($controller, $ids, $conditions = array()) {
