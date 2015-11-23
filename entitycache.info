@@ -1,8 +1,8 @@
 name = Entity cache
 description = Provides caching for core entities including nodes and taxonomy terms.
-
-core = 7.x
 package = Performance and scalability
+core = 7.x
+php = 5.3
 
 files[] = includes/entitycache.entitycachecontrollerhelper.inc
 files[] = includes/entitycache.comment.inc
