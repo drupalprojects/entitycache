@@ -14,6 +14,15 @@
 class EntityCacheControllerHelper extends DrupalDefaultEntityController {
 
   public static function resetEntityCache($controller, array $ids = NULL) {
+    drupal_alter('entitycache_pre_reset_cache', $ids, $controller->entityType);
+
+    // Allow other modules to disable this cache clear, which is useful if
+    // hook_entitycache_pre_cache_get() and hook_entitycache_pre_cache_set()
+    // are used to prevent items to enter the cache.
+    if ($ids === FALSE) {
+      return;
+    }
+
     // Reset the persistent cache.
     if (!empty($ids)) {
       cache_clear_all($ids, 'cache_entity_' . $controller->entityType);
@@ -221,6 +230,8 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   }
 
   public static function entityCacheGet($controller, $ids, $conditions = array()) {
+    drupal_alter('entitycache_pre_cache_get', $ids, $conditions, $controller->entityType);
+
     $cached_entities = array();
     if ($ids && !$conditions) {
       $cached = cache_get_multiple($ids, 'cache_entity_' . $controller->entityType);
@@ -235,9 +246,13 @@ class EntityCacheControllerHelper extends DrupalDefaultEntityController {
   }
 
   public static function entityCacheSet($controller, $entities) {
+    drupal_alter('entitycache_pre_cache_set', $entities, $controller->entityType);
+
     foreach ($entities as $id => $item) {
       cache_set($id, $item, 'cache_entity_' . $controller->entityType);
     }
+
+    drupal_alter('entitycache_post_cache_set', $entities, $controller->entityType);
   }
 
   /**
